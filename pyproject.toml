@@ -1,0 +1,9 @@
+[project]
+name = "flyboard-agent-router"
+version = "0.1.0"
+description = "Tool-using Agent Router API"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
