@@ -8,7 +8,7 @@
 
 ## Setup
 1. Clone repo
-2. `pip install -r requirements.txt`
+2. `pip install -e .[dev]`
 3. `cp .env.example .env` y edita
 4. `python -m pytest` para tests
 5. `python -m uvicorn app.main:app --reload` para servidor

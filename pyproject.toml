@@ -1,8 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "flyboard-agent-router"
 version = "0.1.0"
 description = "Tool-using Agent Router API"
 requires-python = ">=3.11"
+dependencies = [
+	"fastapi==0.128.8",
+	"openai==2.32.0",
+	"pydantic==2.13.3",
+	"python-dotenv==1.2.1",
+	"pytz==2024.2",
+	"uvicorn==0.39.0",
+]
+
+[project.optional-dependencies]
+dev = [
+	"pytest==8.4.2",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
