@@ -9,6 +9,18 @@ Small HTTP API that routes ambiguous user requests through an OpenAI model, deci
 - SQLite
 - Pydantic
 
+## Dependencies
+Runtime (from `pyproject.toml`):
+- fastapi==0.128.8
+- openai==2.32.0
+- pydantic==2.13.3
+- python-dotenv==1.2.1
+- uvicorn==0.39.0
+
+Dev:
+- pytest==8.4.2
+- httpx==0.28.1
+
 ## What It Does
 The service acts as a small decision-and-execution layer:
 - answers from the local knowledge base when possible,
@@ -115,7 +127,7 @@ Return shape:
 ```bash
 pip install -e .[dev]
 ```
-3. Create your `.env` file and set at least:
+3. Create a `.env` file at project root (auto-loaded by the app):
 ```bash
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini

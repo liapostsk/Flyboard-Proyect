@@ -12,13 +12,13 @@ dependencies = [
 	"openai==2.32.0",
 	"pydantic==2.13.3",
 	"python-dotenv==1.2.1",
-	"pytz==2024.2",
 	"uvicorn==0.39.0",
 ]
 
 [project.optional-dependencies]
 dev = [
 	"pytest==8.4.2",
+	"httpx==0.28.1",
 ]
 
 [tool.pytest.ini_options]
