@@ -24,7 +24,7 @@ class ToolRouter:
             return self.kb_service.search_kb(
                 query=validated_input["query"],
                 top_k=validated_input.get("top_k", 5),
-                filters=validated_input.get("filters")
+                filters=self.kb_service.clean_filters(validated_input.get("filters"))
             )
         
         elif tool_name == "create_ticket":

@@ -10,6 +10,7 @@ from app.services.kb import KBService
 from app.services.storage import StorageService
 from app.services.tool_router import ToolRouter
 from app.utils.ids import generate_trace_id
+from app.utils.time import get_current_context
 
 class AgentService:
     def __init__(self):
@@ -112,9 +113,17 @@ class AgentService:
         """
         Construye el mensaje de usuario con contexto.
         """
-        msg = task
+        msg = f"""{get_current_context()}
+
+    Customer ID: {customer_id or "not provided"}
+
+    Task:
+    {task}
+    """
+
         if language:
-            msg += f"\n\nPlease respond in {language}."
+            msg += f"\nPlease respond in {language}."
+
         return msg
     
     def _parse_response(self, response) -> tuple[str, Any]:

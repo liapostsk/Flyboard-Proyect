@@ -132,7 +132,9 @@ pip install -e .[dev]
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_TIMEOUT=60
+OPENAI_SYSTEM_PROMPT=your_optional_custom_prompt
 ```
+If `OPENAI_SYSTEM_PROMPT` is not set, the app uses the default prompt defined in `app/core/config.py`.
 4. Run the tests:
 ```bash
 python -m pytest -q

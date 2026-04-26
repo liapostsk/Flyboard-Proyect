@@ -9,6 +9,7 @@ def test_openai_client_passes_explicit_timeout(monkeypatch):
     monkeypatch.setattr(openai_client_module, "OPENAI_API_KEY", "test-key")
     monkeypatch.setattr(openai_client_module, "OPENAI_MODEL", "test-model")
     monkeypatch.setattr(openai_client_module, "OPENAI_TIMEOUT", 12.5)
+    monkeypatch.setattr(openai_client_module, "OPENAI_SYSTEM_PROMPT", "test-prompt")
 
     dummy_openai = Mock()
     dummy_openai.responses = Mock()
@@ -18,12 +19,14 @@ def test_openai_client_passes_explicit_timeout(monkeypatch):
 
     mock_openai.assert_called_once_with(api_key="test-key", timeout=12.5)
     assert client.model == "test-model"
+    assert client.system_prompt == "test-prompt"
 
 
 def test_openai_timeout_is_mapped_to_integration_error(monkeypatch):
     monkeypatch.setattr(openai_client_module, "OPENAI_API_KEY", "test-key")
     monkeypatch.setattr(openai_client_module, "OPENAI_MODEL", "test-model")
     monkeypatch.setattr(openai_client_module, "OPENAI_TIMEOUT", 12.5)
+    monkeypatch.setattr(openai_client_module, "OPENAI_SYSTEM_PROMPT", "test-prompt")
 
     dummy_responses = Mock()
     dummy_responses.create.side_effect = RuntimeError("timeout")

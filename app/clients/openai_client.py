@@ -1,7 +1,7 @@
 from openai import OpenAI
 from openai._exceptions import APITimeoutError
 from typing import Optional
-from app.core.config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TIMEOUT
+from app.core.config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TIMEOUT, OPENAI_SYSTEM_PROMPT
 from app.core.exceptions import RateLimitError, OpenAIIntegrationError
 
 # Capa de integración con OpenAI Responses API, incluyendo manejo de errores específicos.
@@ -9,27 +9,7 @@ class OpenAIResponsesClient:
     def __init__(self):
         self.client = OpenAI(api_key=OPENAI_API_KEY, timeout=OPENAI_TIMEOUT)
         self.model = OPENAI_MODEL
-        self.system_prompt = self._build_system_prompt()
-    
-    def _build_system_prompt(self) -> str:
-        """
-        Define el comportamiento del modelo.
-        """
-        return """You are a helpful Flyboard support agent.
-
-Your responsibilities:
-1. Use search_kb to find information from the knowledge base
-2. Use create_ticket when users report issues and request help
-3. Use schedule_followup to arrange follow-up calls/emails
-4. Never invent facts outside the KB results
-5. If information is missing, say so and offer to create a ticket
-
-You must:
-- Be concise and helpful
-- Use tools appropriately to solve the user's problem
-- Respond in the user's language when specified
-- Avoid hallucinations
-"""
+        self.system_prompt = OPENAI_SYSTEM_PROMPT
     
     def call_with_tools(self, messages: list, tools: list, trace_id: str, previous_response_id: Optional[str] = None):
         """
