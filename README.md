@@ -105,6 +105,29 @@ Return shape:
 { "scheduled": true, "followup_id": "FUP-000045" }
 ```
 
+### KB Search Behavior
+
+The KB search uses a lightweight keyword-based scoring approach with:
+
+- token normalization (lowercase, plural/singular handling),
+- bigram expansion (e.g. "write back" → "writeback"),
+- weighted scoring across title, tags, and content.
+
+Results are filtered using a minimum score threshold.
+
+For troubleshooting or incident-related queries, filtering is relaxed to allow retrieving both:
+- technical troubleshooting steps, and
+- operational guidance (e.g. escalation policies).
+
+### Filter Strategy
+
+The agent may include optional filters (tags, audience) when calling search_kb.
+
+However:
+- Filters are only used when they improve search quality.
+- If uncertain, filters are omitted to avoid excluding relevant results.
+- For troubleshooting or operational issues, broader searches are preferred.
+
 ## Architecture
 - [app/clients/openai_client.py](app/clients/openai_client.py): wrapper around OpenAI Responses API.
 - [app/services/agent.py](app/services/agent.py): orchestration loop, tool execution, trace/metrics.
@@ -196,14 +219,6 @@ Run the full suite:
 ```bash
 python -m pytest -q
 ```
-
-Current test coverage includes:
-- KB search behavior.
-- Tool validation at the router boundary.
-- Defensive validation in storage.
-- API error mapping for invalid tool input.
-- OpenAI timeout wiring.
-- Agent orchestration loop with tool execution.
 
 ## Notes
 - Coding agent used: GitHub Copilot.
