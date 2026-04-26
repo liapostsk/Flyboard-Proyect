@@ -54,7 +54,12 @@ class KBService:
         # Sort by score, limit to top_k
         scores.sort(key=lambda x: x[0], reverse=True)
 
-        if scores:
+        is_troubleshooting = any(
+            token in query.lower()
+            for token in ["fail", "error", "issue", "troubleshoot"]
+        )
+
+        if scores and not is_troubleshooting:
             best_score = scores[0][0]
             scores = [
                 (score, doc)
