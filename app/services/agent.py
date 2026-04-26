@@ -3,7 +3,7 @@ import time
 from typing import Any, Optional
 
 from app.clients.openai_client import OpenAIResponsesClient
-from app.core.exceptions import IterationLimitExceeded
+from app.core.exceptions import InvalidToolInput, IterationLimitExceeded
 from app.core.logging import get_logger
 from app.schemas.agent import AgentRunResponse, Metrics
 from app.services.kb import KBService
@@ -103,7 +103,7 @@ class AgentService:
             tool_calls=tool_calls_log,
             metrics=Metrics(
                 latency_ms=latency_ms,
-                model="gpt-4o-mini",
+                model=self.openai_client.model,
                 openai_calls=openai_call_count
             )
         )
@@ -130,7 +130,14 @@ class AgentService:
         for block in response.output:
             if block.type == "function_call":
                 has_tool_use = True
-                parsed_args = json.loads(block.arguments) if block.arguments else {}
+                try:
+                    parsed_args = json.loads(block.arguments) if block.arguments else {}
+                except json.JSONDecodeError as exc:
+                    raise InvalidToolInput(
+                        message="Model returned invalid JSON arguments",
+                        tool_name=block.name,
+                        validation_details={"arguments": ["invalid JSON"]},
+                    ) from exc
                 tool_calls.append({
                     "call_id": block.call_id,
                     "name": block.name,
@@ -163,6 +170,12 @@ class AgentService:
             duration = int((time.time() - start) * 1000)
             self.logger.info(f"[{trace_id}] Tool {tool_name} completed in {duration}ms")
             return result
+
+        except InvalidToolInput as exc:
+            if exc.trace_id is None:
+                exc.trace_id = trace_id
+            self.logger.error(f"[{trace_id}] Invalid input for tool {tool_name}: {exc}")
+            raise
         
         except Exception as e:
             self.logger.error(f"[{trace_id}] Tool {tool_name} failed: {str(e)}")

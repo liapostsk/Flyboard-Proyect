@@ -21,6 +21,7 @@ class _FakeFunctionCall:
 
 class _FakeOpenAIClient:
 	def __init__(self) -> None:
+		self.model = "gpt-4o-mini"
 		self.calls = 0
 
 	def call_with_tools(self, messages: list, tools: list, trace_id: str, previous_response_id: Optional[str] = None):
@@ -49,5 +50,6 @@ def test_agent_orchestration_runs_tool_then_returns_final_answer(monkeypatch) ->
 
 	assert result.final_answer == "Pricing is platform fee + usage."
 	assert result.metrics.openai_calls == 2
+	assert result.metrics.model == "gpt-4o-mini"
 	assert len(result.tool_calls) == 1
 	assert result.tool_calls[0].name == "search_kb"

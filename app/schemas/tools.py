@@ -1,5 +1,9 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, ValidationError
+from typing import Any, Optional
+
+from app.core.exceptions import InvalidToolInput
+from typing import Literal
+
 
 # ============ SEARCH_KB ============
 
@@ -23,7 +27,8 @@ class SearchKBResponse(BaseModel):
 class CreateTicketRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     body: str = Field(..., min_length=1, max_length=5000)
-    priority: str = Field(..., pattern="^(low|medium|high)$")
+    priority: Literal["low", "medium", "high"]
+
 
 
 class CreateTicketResponse(BaseModel):
@@ -35,8 +40,43 @@ class CreateTicketResponse(BaseModel):
 class ScheduleFollowupRequest(BaseModel):
     datetime_iso: str = Field(..., description="ISO 8601 datetime")
     contact: str = Field(..., min_length=1, max_length=500)
-    channel: str = Field(..., pattern="^(email|phone|whatsapp)$")
+    channel: Literal["email", "phone", "whatsapp"]
 
 class ScheduleFollowupResponse(BaseModel):
     scheduled: bool
     followup_id: str
+
+
+TOOL_REQUEST_SCHEMAS = {
+    "search_kb": SearchKBRequest,
+    "create_ticket": CreateTicketRequest,
+    "schedule_followup": ScheduleFollowupRequest,
+}
+
+
+def validate_tool_input(tool_name: str, tool_input: Any) -> dict:
+    """Valida y normaliza el payload de una tool usando schemas Pydantic."""
+    schema = TOOL_REQUEST_SCHEMAS.get(tool_name)
+    if schema is None:
+        raise InvalidToolInput(
+            message=f"Unknown tool: {tool_name}",
+            tool_name=tool_name,
+            validation_details={"tool_name": ["unknown tool"]},
+        )
+
+    if not isinstance(tool_input, dict):
+        raise InvalidToolInput(
+            message="Tool input must be an object",
+            tool_name=tool_name,
+            validation_details={"input": ["must be a JSON object"]},
+        )
+
+    try:
+        validated = schema(**tool_input)
+        return validated.model_dump(exclude_none=True)
+    except ValidationError as exc:
+        raise InvalidToolInput(
+            message=f"Invalid input for tool: {tool_name}",
+            tool_name=tool_name,
+            validation_details=exc.errors(),
+        ) from exc

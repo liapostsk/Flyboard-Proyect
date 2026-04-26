@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from app.core.exceptions import InvalidToolInput
 from app.schemas.agent import AgentRunRequest, AgentRunResponse
 from app.services.agent import AgentService
 from app.core.logging import get_logger
@@ -30,6 +31,15 @@ async def run_agent(request: AgentRunRequest) -> AgentRunResponse:
         result.metrics.latency_ms = latency_ms
         
         return result
+
+    except InvalidToolInput as e:
+        logger.warning(f"Invalid tool input: {str(e)}")
+        raise HTTPException(status_code=400, detail={
+            "error": "invalid_tool_input",
+            "tool_name": e.tool_name,
+            "validation_errors": e.validation_details,
+            "trace_id": getattr(e, 'trace_id', 'unknown')
+        })
         
     except Exception as e:
         # Loggear y devolver error controlado

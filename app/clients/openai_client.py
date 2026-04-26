@@ -1,13 +1,14 @@
 from openai import OpenAI
-import os
+from openai._exceptions import APITimeoutError
 from typing import Optional
+from app.core.config import OPENAI_API_KEY, OPENAI_MODEL, OPENAI_TIMEOUT
 from app.core.exceptions import RateLimitError, OpenAIIntegrationError
 
 # Capa de integración con OpenAI Responses API, incluyendo manejo de errores específicos.
 class OpenAIResponsesClient:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        self.client = OpenAI(api_key=OPENAI_API_KEY, timeout=OPENAI_TIMEOUT)
+        self.model = OPENAI_MODEL
         self.system_prompt = self._build_system_prompt()
     
     def _build_system_prompt(self) -> str:
@@ -59,7 +60,8 @@ You must:
             return response
         
         except Exception as e:
-            # Manejar errores específicos de OpenAI
+            if isinstance(e, APITimeoutError) or "timeout" in str(e).lower():
+                raise OpenAIIntegrationError(str(e), trace_id=trace_id)
             if "rate_limit" in str(e).lower():
                 raise RateLimitError(str(e), trace_id=trace_id)
             elif "api_error" in str(e).lower():
