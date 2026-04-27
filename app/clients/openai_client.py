@@ -30,6 +30,7 @@ class OpenAIResponsesClient:
                 "input": messages,
                 "tools": tools,
                 "instructions": self.system_prompt,
+                "temperature": 0,
             }
             if previous_response_id:
                 request_params["previous_response_id"] = previous_response_id

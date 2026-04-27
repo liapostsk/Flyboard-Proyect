@@ -95,6 +95,8 @@ class AgentService:
         
         # 4. Construir respuesta final
         latency_ms = int((time.time() - start_time) * 1000)
+
+        final_answer = self._ensure_required_ids(final_answer, tool_calls_log)
         
         self.logger.info(f"[{trace_id}] Complete. Latency: {latency_ms}ms, OpenAI calls: {openai_call_count}")
         
@@ -189,3 +191,17 @@ class AgentService:
         except Exception as e:
             self.logger.error(f"[{trace_id}] Tool {tool_name} failed: {str(e)}")
             raise
+    
+    def _ensure_required_ids(self, final_answer: str, tool_calls_log: list[dict]) -> str:
+        for tool_call in tool_calls_log:
+            if tool_call["name"] == "create_ticket":
+                ticket_id = tool_call["result"].get("ticket_id")
+                if ticket_id and ticket_id not in final_answer:
+                    final_answer += f"\n\nTicket ID: {ticket_id}"
+
+            if tool_call["name"] == "schedule_followup":
+                followup_id = tool_call["result"].get("followup_id")
+                if followup_id and followup_id not in final_answer:
+                    final_answer += f"\n\nFollow-up ID: {followup_id}"
+
+        return final_answer

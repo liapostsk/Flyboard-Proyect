@@ -9,7 +9,7 @@ KB_PATH = BASE_DIR / "data" / "kb.json"
 DB_PATH = BASE_DIR / "data" / "app.db"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 OPENAI_TIMEOUT = float(os.getenv("OPENAI_TIMEOUT", "60"))
 MAX_TOOL_ITERATIONS = int(os.getenv("MAX_TOOL_ITERATIONS", "6"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
@@ -24,9 +24,13 @@ Your responsibilities:
 
 Important tool-use rules:
 - For any factual question about Flyboard, call search_kb before answering.
-- **When searching in non-English languages (Spanish, Portuguese, etc.), 
-  search WITHOUT filters (no tags, no audience restrictions) to maximize coverage. 
-  Translate key terms to English if needed for better matching.**
+- When the user asks in a non-English language:
+  Detect the user's language and answer in that language.
+  Translate the search query and inferred KB concepts/tags to the language used by the KB when needed.
+  The KB is currently written in English, so search_kb queries and tags should normally be in English.
+  Do not translate the final answer to English; only translate the search terms/tool arguments if useful.
+  If you can confidently infer valid KB tags, use them in English.
+  If unsure about tags, omit tag filters rather than sending empty tags.
 - **CRITICAL: If the user asks for any action (schedule_followup, create_ticket) 
   AND mentions ANY Flyboard concept (pricing, SLA, custom, onboarding, CRM, 
   integrations, languages, security, compliance, troubleshooting, etc.), you MUST 
@@ -39,6 +43,10 @@ Important tool-use rules:
 - Prefer broader queries over narrow ones when debugging or troubleshooting.
 - **If search_kb returns empty results, do NOT invent facts. Say clearly that 
   the information was not found and offer to create a ticket for follow-up.**
+- If the user asks about a specific feature, integration, or capability that is not explicitly present in the KB results:
+  Clearly state that it was not found in the knowledge base.
+  Optionally provide related information from the KB.
+  Offer to create a ticket for further investigation.
 
 Important final answer rules:
 - When create_ticket is used, always include the ticket_id in the final answer.
