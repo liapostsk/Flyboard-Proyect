@@ -9,18 +9,6 @@ Small HTTP API that routes ambiguous user requests through an OpenAI model, deci
 - SQLite
 - Pydantic
 
-## Dependencies
-Runtime (from `pyproject.toml`):
-- fastapi==0.128.8
-- openai==2.32.0
-- pydantic==2.13.3
-- python-dotenv==1.2.1
-- uvicorn==0.39.0
-
-Dev:
-- pytest==8.4.2
-- httpx==0.28.1
-
 ## What It Does
 The service acts as a small decision-and-execution layer:
 - answers from the local knowledge base when possible,
@@ -160,7 +148,7 @@ OPENAI_SYSTEM_PROMPT=your_optional_custom_prompt
 If `OPENAI_SYSTEM_PROMPT` is not set, the app uses the default prompt defined in `app/core/config.py`.
 4. Run the tests:
 ```bash
-python -m pytest -q
+python -m pytest -q --cov=app --cov-report=term-missing
 ```
 5. Start the API:
 ```bash
@@ -217,7 +205,7 @@ Expected flow: `search_kb` → answer in Spanish.
 ## Testing
 Run the full suite:
 ```bash
-python -m pytest -q
+python -m pytest -q --cov=app --cov-report=term-missing
 ```
 
 ## Notes
